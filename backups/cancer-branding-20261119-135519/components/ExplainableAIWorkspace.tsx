@@ -1,0 +1,208 @@
+"use client";
+
+import { useCallback, useEffect, useMemo, useState } from "react";
+import styles from "./ExplainableAIWorkspace.module.css";
+
+const API = "http://127.0.0.1:8000/api/v1";
+
+type Source = {
+  run_id: string;
+  source_type: string;
+  image_id: string;
+  filename: string;
+  created_at: string | null;
+};
+
+type Metric = {
+  key: string;
+  label: string;
+  value: number;
+  explanation: string;
+  section: string;
+};
+
+type Explanation = {
+  run_id: string;
+  source_type: string;
+  source_label: string;
+  image_id: string;
+  filename: string;
+  created_at: string | null;
+  source_metadata: Record<string, unknown>;
+  metrics: Metric[];
+  parameters: Record<string, unknown>;
+  method: string;
+  limitations: string[];
+  explanation_type: string;
+  interpretation_notice: string;
+};
+
+const moduleNames: Record<string, string> = {
+  "cellular-intelligence": "Cellular Intelligence",
+  "nuclear-morphometry": "Nuclear Morphometry",
+  "tumour-microenvironment": "Tumour Microenvironment",
+  "spatial-analysis": "Spatial Analysis",
+};
+
+function pretty(value: unknown): string {
+  if (value === null || value === undefined) return "Not recorded";
+  if (typeof value === "number") return Number.isInteger(value) ? value.toLocaleString() : value.toLocaleString(undefined, { maximumFractionDigits: 4 });
+  if (typeof value === "boolean") return value ? "Yes" : "No";
+  if (typeof value === "object") return JSON.stringify(value, null, 2);
+  return String(value);
+}
+
+export default function ExplainableAIWorkspace() {
+  const [sources, setSources] = useState<Source[]>([]);
+  const [selectedKey, setSelectedKey] = useState("");
+  const [explanation, setExplanation] = useState<Explanation | null>(null);
+  const [loadingSources, setLoadingSources] = useState(true);
+  const [loadingExplanation, setLoadingExplanation] = useState(false);
+  const [error, setError] = useState("");
+
+  const selected = useMemo(
+    () => sources.find((item) => `${item.source_type}:${item.run_id}` === selectedKey),
+    [sources, selectedKey]
+  );
+
+  const loadSources = useCallback(async () => {
+    setLoadingSources(true);
+    setError("");
+    try {
+      const response = await fetch(`${API}/explainable-ai/sources`, { cache: "no-store" });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.detail || "Could not load saved analysis runs.");
+      const items: Source[] = payload.sources || [];
+      setSources(items);
+      if (items.length && !selectedKey) setSelectedKey(`${items[0].source_type}:${items[0].run_id}`);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not connect to the CYTOGENIX API.");
+    } finally {
+      setLoadingSources(false);
+    }
+  }, [selectedKey]);
+
+  useEffect(() => { void loadSources(); }, [loadSources]);
+
+  useEffect(() => {
+    if (!selected) {
+      setExplanation(null);
+      return;
+    }
+
+    const currentSelection = selected;
+    const controller = new AbortController();
+
+    async function loadExplanation() {
+      setLoadingExplanation(true);
+      setError("");
+      setExplanation(null);
+      try {
+        const response = await fetch(
+          `${API}/explainable-ai/runs/${currentSelection.source_type}/${currentSelection.run_id}/explanation`,
+          { cache: "no-store", signal: controller.signal }
+        );
+        const payload = await response.json();
+        if (!response.ok) throw new Error(payload.detail || "Could not explain this analysis run.");
+        setExplanation(payload);
+      } catch (err) {
+        if (err instanceof Error && err.name !== "AbortError") setError(err.message);
+      } finally {
+        if (!controller.signal.aborted) setLoadingExplanation(false);
+      }
+    }
+    void loadExplanation();
+    return () => controller.abort();
+  }, [selected]);
+
+  return (
+    <main className={styles.workspace}>
+      <div className={styles.header}>
+        <div>
+          <div className={styles.eyebrow}>MODULE 10 / MODEL TRANSPARENCY</div>
+          <h1>Explainable AI</h1>
+          <p>Understand the measurements, methods, parameters and limitations behind saved CYTOGENIX analyses.</p>
+        </div>
+        <button className={styles.refreshButton} onClick={() => void loadSources()} disabled={loadingSources}>
+          {loadingSources ? "Loading…" : "Refresh analyses"}
+        </button>
+      </div>
+
+      <section className={styles.notice}>
+        <strong>Research transparency mode</strong>
+        <span>This workspace documents existing algorithmic outputs. It does not generate model explanations, clinical predictions, SHAP values, Grad-CAM maps or confidence scores.</span>
+      </section>
+
+      <section className={styles.panel}>
+        <div className={styles.panelHeading}>
+          <div><span className={styles.sectionLabel}>SOURCE ANALYSIS</span><h2>Select a saved run</h2></div>
+          <span className={styles.count}>{sources.length} saved runs</span>
+        </div>
+        {loadingSources ? <p className={styles.muted}>Loading saved analyses from the database…</p> : null}
+        {!loadingSources && sources.length === 0 ? (
+          <div className={styles.empty}>No saved analysis runs were found. Complete an analysis in Cellular Intelligence, Nuclear Morphometry, Tumour Microenvironment or Spatial Analysis, then refresh this page.</div>
+        ) : null}
+        {sources.length > 0 ? (
+          <label className={styles.selectLabel}>
+            Saved analysis
+            <select value={selectedKey} onChange={(event) => setSelectedKey(event.target.value)}>
+              {sources.map((item) => (
+                <option key={`${item.source_type}:${item.run_id}`} value={`${item.source_type}:${item.run_id}`}>
+                  {moduleNames[item.source_type] || item.source_type} · {item.filename} · {item.run_id.slice(0, 8)}
+                </option>
+              ))}
+            </select>
+          </label>
+        ) : null}
+      </section>
+
+      {error ? <div className={styles.error}>{error}</div> : null}
+      {loadingExplanation ? <section className={styles.panel}><p className={styles.muted}>Preparing the explanation…</p></section> : null}
+
+      {explanation ? <>
+        <section className={styles.panel}>
+          <div className={styles.panelHeading}><div><span className={styles.sectionLabel}>RUN PROVENANCE</span><h2>{explanation.source_label}</h2></div><span className={styles.status}>Saved result</span></div>
+          <div className={styles.provenanceGrid}>
+            <div><span>Source image</span><strong>{explanation.filename}</strong></div>
+            <div><span>Analysis run ID</span><strong className={styles.mono}>{explanation.run_id}</strong></div>
+            <div><span>Image ID</span><strong className={styles.mono}>{explanation.image_id}</strong></div>
+            <div><span>Created</span><strong>{explanation.created_at ? new Date(explanation.created_at).toLocaleString() : "Not recorded"}</strong></div>
+          </div>
+        </section>
+
+        <section className={styles.panel}>
+          <div className={styles.panelHeading}><div><span className={styles.sectionLabel}>MEASUREMENT GUIDE</span><h2>What the results mean</h2></div></div>
+          {explanation.metrics.length ? <div className={styles.metricGrid}>
+            {explanation.metrics.map((metric) => (
+              <article className={styles.metricCard} key={`${metric.section}:${metric.key}`}>
+                <span>{metric.label}</span><strong>{pretty(metric.value)}</strong><p>{metric.explanation}</p>
+              </article>
+            ))}
+          </div> : <p className={styles.muted}>This run has no numeric summary fields available for display. Review its method and limitations below.</p>}
+        </section>
+
+        <section className={styles.twoColumn}>
+          <article className={styles.panel}>
+            <span className={styles.sectionLabel}>COMPUTATIONAL METHOD</span><h2>How it was produced</h2>
+            <p className={styles.bodyText}>{explanation.method}</p>
+            <p className={styles.subtle}>{explanation.explanation_type}</p>
+          </article>
+          <article className={styles.panel}>
+            <span className={styles.sectionLabel}>CONFIGURATION</span><h2>Recorded parameters</h2>
+            {Object.keys(explanation.parameters).length ? <dl className={styles.parameterList}>
+              {Object.entries(explanation.parameters).map(([key, value]) => <div key={key}><dt>{key.replaceAll("_", " ")}</dt><dd>{pretty(value)}</dd></div>)}
+            </dl> : <p className={styles.muted}>No parameter object was stored for this run.</p>}
+          </article>
+        </section>
+
+        <section className={styles.panel}>
+          <span className={styles.sectionLabel}>LIMITATIONS & SCIENTIFIC CAUTION</span><h2>What this result cannot tell you</h2>
+          <ul className={styles.limitations}>{explanation.limitations.map((item, index) => <li key={index}>{item}</li>)}</ul>
+          <div className={styles.warning}>{explanation.interpretation_notice}</div>
+        </section>
+      </> : null}
+
+      <footer className={styles.footer}>CYTOGENIX · Experimental biomedical research platform · Not for clinical diagnosis or patient management</footer>
+    </main>
+  );
+}

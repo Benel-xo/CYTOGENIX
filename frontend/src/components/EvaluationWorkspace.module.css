@@ -1,0 +1,53 @@
+.workspace{width:100%;max-width:1500px;margin:0 auto;padding:30px 34px 50px;color:var(--foreground,#e8edf5)}
+.header{display:flex;justify-content:space-between;align-items:flex-start;gap:24px;margin-bottom:28px}
+.eyebrow{font-size:10px;letter-spacing:1.7px;font-weight:750;color:#7d9dbd;margin-bottom:10px}
+.header h1{font-size:clamp(28px,4vw,40px);letter-spacing:-1.2px;margin:0 0 10px;font-weight:750}
+.header p{color:#91a0b2;line-height:1.7;max-width:720px;margin:0;font-size:14px}
+.refresh,.inspect{border:1px solid #34465b;background:#142236;color:#dce8f5;padding:10px 15px;border-radius:9px;font-weight:650;cursor:pointer}
+.refresh:disabled{opacity:.6;cursor:wait}
+.metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin:22px 0}
+.metrics article{background:#101d2d;border:1px solid #25364a;border-radius:13px;padding:19px;min-height:116px;display:flex;flex-direction:column;gap:9px}
+.metrics article span,.modelInfo span{font-size:9px;letter-spacing:1.1px;color:#8ca1b8;font-weight:750}
+.metrics article strong{font-size:27px;letter-spacing:-.5px;color:#e9f2fc}
+.metrics article small{font-size:11px;color:#8293a8}
+.panel{background:#101b2a;border:1px solid #26364a;border-radius:15px;padding:23px;margin-top:20px}
+.panelHeading{display:flex;justify-content:space-between;align-items:center;gap:15px;margin-bottom:18px}
+.panelHeading h2,.panel h2{font-size:20px;margin:0;color:#e8eff8}
+.count{font-size:10px;color:#91a6bc;letter-spacing:1px}
+.tableWrap{overflow-x:auto}
+.tableWrap table{width:100%;border-collapse:collapse;text-align:left;min-width:780px}
+.tableWrap th{font-size:9px;letter-spacing:1px;color:#8297ae;padding:13px 10px;border-bottom:1px solid #2b3b50}
+.tableWrap td{font-size:12px;color:#d5dfeb;padding:15px 10px;border-bottom:1px solid #223247}
+.activeRow{background:#17283b}
+.status{display:inline-block;border-radius:30px;padding:5px 9px;font-size:10px;font-weight:700;background:#263448;color:#bdcde0}
+.completed{background:#153a32;color:#78d8b5}
+.failed{background:#45252b;color:#ff9da5}
+.running{background:#3d351c;color:#f3d078}
+.queued{background:#263448;color:#bdcde0}
+.inspect{padding:7px 10px;font-size:10px}
+.modelInfo{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:20px 0 26px}
+.modelInfo div{background:#152438;border-radius:9px;padding:14px;min-width:0}
+.modelInfo strong{display:block;font-size:12px;margin-top:8px;overflow-wrap:anywhere;color:#e2ebf5}
+.subheading{font-size:14px;margin:26px 0 12px;color:#dce8f5}
+.history{display:grid;gap:12px}
+.epoch{background:#152438;border:1px solid #283b52;border-radius:10px;padding:14px}
+.epochTop,.epochDetails{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:11px;color:#aabbd0}
+.epochTop strong{color:#e6eef8}
+.track{height:7px;background:#29394c;border-radius:10px;overflow:hidden;margin:12px 0}
+.bar{height:100%;background:#58b99d;border-radius:10px}
+.epochDetails{font-size:10px;color:#879bb1}
+.classes,.metricGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.classes span,.metricGrid div{background:#152438;border:1px solid #283b52;border-radius:9px;padding:12px;font-size:11px;color:#c7d5e5}
+.metricGrid div{display:flex;flex-direction:column;gap:7px}
+.metricGrid strong{font-size:11px;color:#83d5b7}
+.metricGrid span{font-size:11px;color:#a8b8ca}
+.note{font-size:11px;line-height:1.7;color:#92a4b8;margin:18px 0 0}
+.empty{padding:35px 20px;text-align:center;background:#152438;border-radius:10px}
+.empty h3{margin:0 0 8px;font-size:17px}
+.empty p,.muted{font-size:12px;color:#93a5b9;line-height:1.7}
+.error{padding:12px 15px;border-radius:9px;background:#43262d;color:#ffb1b6;font-size:12px;margin:15px 0}
+.disclaimer{margin-top:20px;border:1px solid #3a3a30;background:#211f19;border-radius:12px;padding:17px 19px}
+.disclaimer strong{font-size:12px;color:#e6d5a6}
+.disclaimer p{font-size:11px;line-height:1.7;color:#b5ad99;margin:7px 0 0}
+@media(max-width:950px){.metrics,.modelInfo{grid-template-columns:repeat(2,minmax(0,1fr))}.classes,.metricGrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:650px){.workspace{padding:20px 15px 35px}.header{flex-direction:column}.metrics,.modelInfo{grid-template-columns:1fr 1fr}.panel{padding:16px}.epochDetails{flex-direction:column;gap:5px}}

@@ -1,0 +1,51 @@
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
+from app.api.routes.health import router as health_router
+from app.api.routes.microscopy import router as microscopy_router
+from app.api.routes.image_processing import router as image_processing_router
+from app.api.routes.segmentation import router as segmentation_router
+from app.api.routes.cellular_intelligence import router as cellular_intelligence_router
+from app.api.routes.nuclear_morphometry import router as nuclear_morphometry_router
+from app.api.routes.tumour_microenvironment import router as tumour_microenvironment_router
+from app.api.routes.spatial_analysis import router as spatial_analysis_router
+from app.api.routes.explainable_ai import router as explainable_ai_router
+from app.api.routes.model_laboratory import router as model_laboratory_router
+from app.api.routes.dataset_laboratory import router as dataset_laboratory_router
+from app.api.routes.reference_slides import router as reference_slides_router
+from app.api.routes.cancer_classification import router as cancer_classification_router
+from app.api.routes.reports import router as reports_router
+
+app = FastAPI(
+    title="CYTOGENIX API",
+    description="Computational Cytology and Intelligent Histopathology Research Platform",
+    version="0.8.0",
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+app.include_router(health_router, prefix="/api/v1")
+app.include_router(microscopy_router, prefix="/api/v1")
+app.include_router(image_processing_router, prefix="/api/v1")
+app.include_router(segmentation_router, prefix="/api/v1")
+app.include_router(cellular_intelligence_router, prefix="/api/v1")
+app.include_router(nuclear_morphometry_router, prefix="/api/v1")
+app.include_router(tumour_microenvironment_router, prefix="/api/v1")
+app.include_router(spatial_analysis_router, prefix="/api/v1")
+app.include_router(explainable_ai_router, prefix="/api/v1")
+app.include_router(model_laboratory_router, prefix="/api/v1")
+app.include_router(cancer_classification_router, prefix="/api/v1")
+app.include_router(dataset_laboratory_router, prefix="/api/v1")
+app.include_router(reference_slides_router, prefix="/api/v1")
+app.include_router(reports_router, prefix="/api/v1")
+
+
+@app.get("/")
+def root():
+    return {"name": "CYTOGENIX", "description": "Computational Cytology and Intelligent Histopathology Research Platform", "version": "0.8.0", "status": "online"}

@@ -1,0 +1,73 @@
+.DS_Store
+.env
+.env.*
+!.env.example
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.next/
+node_modules/
+dist/
+build/
+*.log
+mlruns/
+data/raw/*
+data/processed/*
+data/results/*
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+!data/results/.gitkeep
+
+# CYTOGENIX local datasets, microscopy images and generated outputs
+/data/
+
+# Private deployment configuration
+.env
+.env.*
+!.env.example
+backend/.env
+
+# Local databases and backups
+*.sqlite
+*.sqlite3
+*.db
+*.dump
+*.sql
+
+# Private keys and certificates
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Local datasets and generated research outputs
+/data/
+
+# CYTOGENIX deployment security
+/data/
+backend/.env
+.env
+.env.*
+!.env.example
+
+# Local databases and backups
+*.sqlite
+*.sqlite3
+*.db
+*.dump
+*.sql
+
+# Private keys
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Build and dependency directories
+node_modules/
+.next/
+.venv/
+.vercel/
