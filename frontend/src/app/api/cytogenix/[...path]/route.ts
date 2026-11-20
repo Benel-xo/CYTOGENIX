@@ -6,7 +6,12 @@ type RouteContext = {
 
 async function proxy(request: NextRequest, context: RouteContext) {
   const { path } = await context.params;
-  const target = `http://127.0.0.1:8000/api/v1/${path
+
+  const backendBase = (
+    process.env.BACKEND_URL || "http://127.0.0.1:8000"
+  ).replace(/\/+$/, "");
+
+  const target = `${backendBase}/api/v1/${path
     .map((part) => encodeURIComponent(part))
     .join("/")}${request.nextUrl.search}`;
 
@@ -33,7 +38,10 @@ async function proxy(request: NextRequest, context: RouteContext) {
 
     const responseHeaders = new Headers();
     const responseType = response.headers.get("content-type");
-    if (responseType) responseHeaders.set("content-type", responseType);
+
+    if (responseType) {
+      responseHeaders.set("content-type", responseType);
+    }
 
     return new Response(await response.arrayBuffer(), {
       status: response.status,
@@ -41,7 +49,7 @@ async function proxy(request: NextRequest, context: RouteContext) {
     });
   } catch {
     return Response.json(
-      { detail: "CYTOGENIX backend is unavailable. Check that Terminal 1 is running." },
+      { detail: "CYTOGENIX backend is unavailable. Check the Vercel backend service." },
       { status: 502 }
     );
   }
